@@ -70,10 +70,15 @@
           <strong>
             <p>Address: {{ twin.account_id }}</p>
           </strong>
+          <v-btn color="blue" outlined @click="openGaiaForm=true"> Sign in to Gaia Compliance</v-btn>
         </v-card-text>
         <v-icon class="pencil" @click="openEditTwin=true">mdi-account-edit</v-icon>
       </v-card>
     </v-row>
+    <GaiaForm
+      :open="this.openGaiaForm"
+      :close="() => openGaiaForm = false"
+      />
 
     <EditTwin
       :open="openEditTwin"
@@ -97,6 +102,7 @@
 import { mapGetters } from 'vuex'
 import CreateTwin from './twins/createTwin.vue'
 import EditTwin from './twins/editTwin.vue'
+import GaiaForm from './gaia/gaiaForm.vue'
 import Deposit from './bridge/deposit.vue'
 import Withdraw from './bridge/withdraw.vue'
 import { getTwin, updateTwin } from '../lib/twin'
@@ -114,6 +120,7 @@ export default {
   components: {
     CreateTwin,
     EditTwin,
+    GaiaForm,
     Deposit,
     Withdraw
   },
@@ -143,6 +150,7 @@ export default {
       openDeposit: false,
       openWithdraw: false,
       openEditTwin: false,
+      openGaiaForm: false,
       loadingEditTwin: false,
       loadingGetMoreTft: false,
     }
