@@ -1,6 +1,10 @@
 <template>
   <div class="text-center">
-    <v-dialog v-model="open" width="750" v-on:click:outside="close">
+    <v-dialog
+      v-model="$store.getters.isGaiaFormOpen"
+      width="750"
+      v-on:click:outside="close"
+    >
       <v-card>
         <v-card-title class="text-h5"> Compliance Fields </v-card-title>
         <br />
@@ -26,13 +30,16 @@
   </div>
 </template>
 <script>
-import axios from "axios";
+// import axios from "axios";
+import { listTwinStore, getTwinVC, setTwinVC } from "../../lib/gaia";
 export default {
   name: "GaiaForm",
-  props: ["open", "close"],
 
   data: () => {
     return {
+      twinVC: {},
+      userData: {},
+      isOpen: open,
       complianceFields: [
         {
           label: "Name",
@@ -64,23 +71,73 @@ export default {
   },
 
   methods: {
+    close() {
+      this.$store.state.isGaiaFormOpen = false;
+    },
+
     async signIn() {
       this.loading = true;
 
-      let userData = {};
+      // reformat the compliance fields
       for (let field of this.complianceFields) {
-        userData[field.key] = field.value;
+        this.userData[field.key] = field.value;
       }
-      console.log(userData);
 
-      const res = await axios.post(
-        "https://hanafy.threefold.io/lib/sign",
-        userData
-      );
+    
+      // store the user data in the chain
+      await this.set("gaia", JSON.stringify(this.userData), (res) => {
+        console.log(res);
 
+        const { status } = res;
+        console.log(`Current status is ${status.type}`);
+        switch (status.type) {
+          case "Ready":
+            this.$toasted.show(`Storing Signed Self Description`);
+        }
+
+        if (status.isFinalized) {
+          console.log(`Signed Self Description stored`);
+          this.$toasted.show(`Signed Self Description stored`);
+
+          this.$store.state.signed = false;
+          this.loading = false;
+          this.close();
+        }
+      });
+
+      // get your twin VC
+      // const res = await axios.post(
+      //   "https://hanafy.threefold.io/lib/sign",
+      //   this.userData
+      // );
+
+      // this.$toasted.show("Signing in your Self Description");
+      // console.log(res.data);
+      // console.log(JSON.stringify(res.data));
+    },
+
+    async list() {
+      const api = await this.$store.state.api;
+      const address = this.$route.params.accountID;
+
+      const res = await listTwinStore(api, address);
       console.log(res);
+    },
 
-      this.loading = false;
+    async get() {
+      const key = "gaia";
+      const api = await this.$store.state.api;
+      const address = this.$route.params.accountID;
+
+      const res = await getTwinVC(api, address, key);
+      console.log(res);
+    },
+
+    async set(key, value, callback) {
+      const api = await this.$store.state.api;
+      const address = this.$route.params.accountID;
+
+      return setTwinVC(api, address, key, value, callback);
     },
   },
 };

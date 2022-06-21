@@ -17,7 +17,10 @@ const store = new Vuex.Store({
     snackbar: false,
     connected: false,
     accounts: [],
-    loadingAPI: true
+    loadingAPI: true,
+    isGaiaFormOpen: false,
+    isGaiaModalOpen: false,
+    signed: false,
   },
   mutations: {
     setAPI (state, payload) {
@@ -34,6 +37,12 @@ const store = new Vuex.Store({
     },
     setLoadingAPI (state, payload) {
       state.loadingAPI = payload.loading
+    },
+    setGaiaFormOpen (state, payload) {
+      state.isGaiaFormOpen = payload.isOpen
+    },
+    setGaiaModalOpen (state, payload) {
+      state.isGaiaFormOpen = payload.isOpen
     }
   },
   getters: {
@@ -41,7 +50,9 @@ const store = new Vuex.Store({
     accounts: state => { return state.accounts },
     snackbar: state => { return state.snackbar },
     connected: state => { return state.connected },
-    loadingAPI: state => { return state.loadingAPI }
+    loadingAPI: state => { return state.loadingAPI },
+    isGaiaFormOpen: state => { return state.isGaiaFormOpen },
+    isGaiaModalOpen: state => { return state.isGaiaModalOpen }
   },
   actions: {
     async getAPI(context) {
@@ -68,7 +79,13 @@ const store = new Vuex.Store({
       const accountsWithBalance = await appendBalanceToAccounts(context.state.api, accounts)
       console.log(accountsWithBalance)
       context.commit('setAccounts', { accounts: accountsWithBalance })
-    }
+    }, 
+
+    // async storeTwinData(context) {
+    //   console.log("Storing Twin Data")
+
+    // }
+    // async signIn
   }
 })
 
